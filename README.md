@@ -81,14 +81,14 @@ The system follows a clean, layered architecture:
 
 ### Prerequisites
 
-- **Docker and Docker Compose** (for containerized setup)
+- **Docker and Docker Compose** (for containerized setup) - **RECOMMENDED**
 - **Go 1.23+** (for local development)
 - **PostgreSQL** (for local development)
 - **Redis** (for local development)
 
 ## How to Run Locally
 
-### Option 1: Using Makefile (Recommended)
+### Option 1: Using Docker with Makefile (RECOMMENDED)
 
 1. **Clone the repository**
    ```bash
@@ -96,33 +96,42 @@ The system follows a clean, layered architecture:
    cd otp-server
    ```
 
-2. **Check required tools**
+2. **Quick Start with Docker (RECOMMENDED)**
    ```bash
-   make check-tools
+   make docker-run   # Start all services with Docker
    ```
-
-3. **Install dependencies**
-   ```bash
-   make deps
-   ```
-
-4. **Set up environment variables**
-   ```bash
-   cp env.example .env
-   # Edit .env with your local database credentials
-   ```
-
-5. **Run database migrations**
-   ```bash
-   # Option A: Local PostgreSQL (requires .env file)
-   make migrate-up
    
-   # Option B: Docker container (recommended for Docker setup)
+   This single command will:
+   - Start PostgreSQL and Redis containers
+   - Build and start the OTP server
+   - Run database migrations automatically
+   - Set up the complete development environment
+
+3. **Alternative: Manual Docker Setup**
+   ```bash
+   # Check required tools
+   make check-tools
+   
+   # Start all services
+   docker-compose up -d
+   
+   # Run database migrations
    make migrate-up-docker
    ```
 
-6. **Start the application**
+4. **Alternative: Local Development Setup**
    ```bash
+   # Install dependencies
+   make deps
+   
+   # Set up environment variables
+   cp env.example .env
+   # Edit .env with your local database credentials
+   
+   # Run database migrations
+   make migrate-up
+   
+   # Start the application
    make run          # Build and run
    # OR
    make dev          # Development mode with hot reload
