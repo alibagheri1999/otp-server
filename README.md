@@ -96,7 +96,7 @@ The system follows a clean, layered architecture:
    cd otp-server
    ```
 
-2. **Quick Start with Docker (RECOMMENDED)**
+2. **Quick Start with Docker (RECOMMENDED) `DO NOT NEED TO CHANGE OR CREATE ANYTHING`**
    ```bash
    make docker-run   # Start all services with Docker
    ```
@@ -119,25 +119,44 @@ The system follows a clean, layered architecture:
    make migrate-up-docker
    ```
 
-4. **Alternative: Local Development Setup**
+### Option 2: Manual Setup with Docker Run Commands
+
+1. **Start PostgreSQL with Docker Run**
    ```bash
-   # Install dependencies
-   make deps
-   
-   # Set up environment variables
-   cp env.example .env
-   # Edit .env with your local database credentials
-   
-   # Run database migrations
-   make migrate-up
-   
-   # Start the application
-   make run          # Build and run
-   # OR
-   make dev          # Development mode with hot reload
+   docker run -d --name otp-postgres \
+     -e POSTGRES_USER=otp_server_user \
+     -e POSTGRES_PASSWORD=otp_server_password \
+     -e POSTGRES_DB=otp_server_db \
+     -p 5432:5432 \
+     postgres:16
    ```
 
-### Option 2: Manual Setup
+2. **Start Redis with Docker Run (with memory config)**
+   ```bash
+   docker run -d --name otp-redis \
+     -p 6379:6379 \
+     redis:7 redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru
+   ```
+
+3. **Set environment variables**
+   ```bash
+   export DB_PROVIDER=postgres
+   export POSTGRES_HOST=localhost
+   export POSTGRES_PORT=5432
+   export POSTGRES_USER=otp_server_user
+   export POSTGRES_PASSWORD=otp_server_password
+   export POSTGRES_DB=otp_server_db
+   export JWT_SECRET=your-secret-key
+   export REDIS_HOST=localhost
+   export REDIS_PORT=6379
+   ```
+
+4. **Run the application**
+   ```bash
+   go run cmd/main.go
+   ```
+
+### Option 3: Local Development Setup
 
 1. **Install dependencies**
    ```bash
@@ -166,12 +185,12 @@ The system follows a clean, layered architecture:
      -e POSTGRES_PASSWORD=otp_server_password \
      -e POSTGRES_DB=otp_server_db \
      -p 5432:5432 \
-     postgres:15
+     postgres:16
 
    # Start Redis (if using Docker)
    docker run -d --name redis \
      -p 6379:6379 \
-     redis:7-alpine
+     redis:7 redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru
    ```
 
 4. **Run the application**
@@ -179,62 +198,7 @@ The system follows a clean, layered architecture:
    go run cmd/main.go
    ```
 
-## How to Run with Docker
 
-### Quick Start with Docker Compose
-
-1. **Clone and navigate to the repository**
-   ```bash
-   git clone <repository-url>
-   cd otp-server
-   ```
-
-2. **Start all services**
-   ```bash
-   make docker-run
-   # OR
-   docker-compose up -d
-   ```
-
-3. **Check service status**
-   ```bash
-   docker-compose ps
-   ```
-
-4. **View logs**
-   ```bash
-   make docker-logs
-   # OR
-   docker-compose logs -f otp-server
-   ```
-
-5. **Stop services**
-   ```bash
-   make docker-stop
-   # OR
-   docker-compose down
-   ```
-
-### Docker Commands
-
-```bash
-# Build the application image
-make docker-build
-
-# Run with Docker Compose
-make docker-run
-
-# View logs
-make docker-logs
-
-# Stop services
-make docker-stop
-
-# Rebuild and restart
-make docker-stop
-make docker-build
-make docker-run
-```
 
 ### Database Migrations with Docker
 
@@ -253,6 +217,30 @@ make db-schema
 ```
 
 **Note**: The Docker-based migration commands automatically use the PostgreSQL container credentials and don't require local PostgreSQL installation or `.env` file configuration.
+
+### Docker Commands
+
+```bash
+# Build the application image
+make docker-build
+
+# Run with Docker Compose
+make docker-run
+
+# View logs
+make docker-logs
+
+# Stop services
+make docker-stop
+
+# Check service status
+docker-compose ps
+
+# Rebuild and restart
+make docker-stop
+make docker-build
+make docker-run
+```
 
 ### Configuration File
 
@@ -645,18 +633,7 @@ go test -cover ./...
 go test ./internal/application/services
 ```
 
-### Database Operations
 
-```bash
-# Local development (requires .env file)
-make migrate-up
-
-# Docker-based operations (no local setup required)
-make migrate-up-docker      # Interactive migration
-make migrate-up-docker-ci   # Non-interactive migration
-make db-status             # Check database tables
-make db-schema             # Show table structure
-```
 
 ## Performance Considerations
 
@@ -824,27 +801,7 @@ docker-compose logs -f otp-server
 - **Memory Policies**: Configurable eviction policies (LRU, LFU, TTL-based)
 - **Memory Limits**: Set maximum memory limits with graceful degradation
 
-**Current Redis Memory Configuration (Docker Compose):**
-The system already includes Redis memory management configuration in the docker-compose setup:
 
-```yaml
-redis:
-  image: redis:7-alpine
-  command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --save 900 1 --save 300 10 --save 60 10000
-  environment:
-    - REDIS_MAXMEMORY=256mb
-    - REDIS_MAXMEMORY_POLICY=allkeys-lru
-  volumes:
-    - redis_data:/data
-  ports:
-    - "6379:6379"
-```
-
-**Memory Management Features Currently Implemented:**
-- **Max Memory Limit**: 256MB memory limit to prevent Redis from consuming excessive memory
-- **LRU Eviction Policy**: `allkeys-lru` policy removes least recently used keys when memory limit is reached
-- **Persistence Configuration**: Automatic data persistence with configurable save intervals
-- **Memory Monitoring**: Built-in Redis memory usage tracking and statistics
 
 ### Application High Availability
 - **Load Balancer Integration**: Deploy behind HAProxy, Nginx, or cloud load balancers
