@@ -99,6 +99,10 @@ The system follows a clean, layered architecture:
 2. **Quick Start with Docker (RECOMMENDED) `DO NOT NEED TO CHANGE OR CREATE ANYTHING`**
    ```bash
    make docker-run   # Start all services with Docker
+
+   Or
+
+   docker compose up
    ```
    
    This single command will:
