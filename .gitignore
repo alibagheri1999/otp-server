@@ -1,0 +1,74 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# Go build outputs
+bin/
+build/
+dist/
+out/
+*.test
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go caches
+.gocache/
+.golangci-lint-cache
+
+# Binary (adjust if your output name differs)
+couple-diary
+
+# Coverage
+cover.out
+coverage.out
+coverage.txt
+profile.out
+*.coverprofile
+
+# Logs / temp
+*.log
+tmp/
+temp/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+config.env
+config.local.env
+*.secret
+*.secrets
+*.key
+*.pem
+*.crt
+
+# Config overrides
+config.local.yaml
+config/*.local.yaml
+
+# Docker
+.docker/
+docker-data/
+docker-compose.override.yml
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+
+# Redis
+dump.rdb
+
+# Misc
+nohup.out
+
+
+main
+bin/

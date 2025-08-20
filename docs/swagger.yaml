@@ -1,0 +1,401 @@
+definitions:
+  dto.AuthResponse:
+    description: Successful authentication response with token and user info
+    properties:
+      token:
+        description: |-
+          @Description JWT token for API authentication
+          @Example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/dto.AuthUserResponse'
+        description: '@Description User information'
+    type: object
+  dto.AuthUserResponse:
+    description: User profile information for authentication
+    properties:
+      id:
+        description: |-
+          @Description Unique user identifier
+          @Example 123
+        example: 123
+        type: integer
+      name:
+        description: |-
+          @Description User's full name
+          @Example John Doe
+        example: John Doe
+        type: string
+      phone_number:
+        description: |-
+          @Description User's phone number
+          @Example +1234567890
+        example: "+1234567890"
+        type: string
+      role:
+        description: |-
+          @Description User's role in the system
+          @Example user
+        enum:
+        - user
+        - admin
+        example: user
+        type: string
+    type: object
+  dto.ErrorResponse:
+    description: Standard error response format
+    properties:
+      error:
+        description: |-
+          @Description Error type or category
+          @Example validation_error
+        example: validation_error
+        type: string
+      message:
+        description: |-
+          @Description Detailed error message
+          @Example Phone number format is invalid
+        example: Phone number format is invalid
+        type: string
+    type: object
+  dto.SendOTPRequest:
+    description: Request to send OTP to a phone number
+    properties:
+      phone_number:
+        description: |-
+          @Description Phone number in international format (e.g., +1234567890)
+          @Example +1234567890
+          @Required
+        example: "+1234567890"
+        type: string
+    required:
+    - phone_number
+    type: object
+  dto.SendOTPResponse:
+    description: Response when OTP is sent successfully
+    properties:
+      message:
+        description: |-
+          @Description Success message
+          @Example OTP sent successfully
+        example: OTP sent successfully
+        type: string
+      phone_number:
+        description: |-
+          @Description Phone number where OTP was sent
+          @Example +1234567890
+        example: "+1234567890"
+        type: string
+      timestamp:
+        description: |-
+          @Description Timestamp when OTP was sent
+          @Example 2024-01-15T10:30:00Z
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  dto.UnifiedUsersResponse:
+    properties:
+      page:
+        properties:
+          limit:
+            type: integer
+          offset:
+            type: integer
+        type: object
+      query:
+        type: string
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/dto.UserResponse'
+        type: array
+    type: object
+  dto.UpdateProfileRequest:
+    description: Request to update user profile information
+    properties:
+      name:
+        description: |-
+          @Description User's full name
+          @Example John Doe
+          @Required
+        example: John Doe
+        type: string
+    required:
+    - name
+    type: object
+  dto.UserResponse:
+    description: User information
+    properties:
+      created_at:
+        description: |-
+          @Description Account creation timestamp
+          @Example 2024-01-01T00:00:00Z
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      id:
+        description: |-
+          @Description Unique user identifier
+          @Example 123
+        example: 123
+        type: integer
+      is_active:
+        description: |-
+          @Description Whether the user account is active
+          @Example true
+        example: true
+        type: boolean
+      name:
+        description: |-
+          @Description User's full name
+          @Example John Doe
+        example: John Doe
+        type: string
+      phone_number:
+        description: |-
+          @Description User's phone number
+          @Example +1234567890
+        example: "+1234567890"
+        type: string
+      role:
+        description: |-
+          @Description User's role in the system
+          @Example user
+        example: user
+        type: string
+      updated_at:
+        description: |-
+          @Description Last profile update timestamp
+          @Example 2024-01-01T00:00:00Z
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
+  dto.VerifyOTPRequest:
+    description: Request to verify OTP and authenticate user
+    properties:
+      name:
+        description: |-
+          @Description User's name (required for new user registration)
+          @Example John Doe
+          @Required
+        example: John Doe
+        type: string
+      otp:
+        description: |-
+          @Description One-time password (6 digits)
+          @Example 123456
+          @Required
+        example: "123456"
+        type: string
+      phone_number:
+        description: |-
+          @Description Phone number in international format
+          @Example +1234567890
+          @Required
+        example: "+1234567890"
+        type: string
+    required:
+    - name
+    - otp
+    - phone_number
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@otpserver.com
+    name: API Support
+    url: http://www.swagger.io/support
+  description: A secure OTP-based authentication service with user management
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: OTP Server API
+  version: "1.0"
+paths:
+  /api/v1/auth/send-otp:
+    post:
+      consumes:
+      - application/json
+      description: Send a one-time password (OTP) to the provided phone number for
+        authentication
+      parameters:
+      - description: Send OTP request with phone number
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            $ref: '#/definitions/dto.SendOTPResponse'
+        "400":
+          description: Invalid phone number format
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "429":
+          description: Too many OTP requests
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Send OTP
+      tags:
+      - Authentication
+  /api/v1/auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify the one-time password (OTP) sent to the user's phone number
+        and return JWT authentication tokens
+      parameters:
+      - description: Verify OTP request with phone number and OTP code
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authentication successful - returns access token, refresh token,
+            and user info
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Invalid request format or missing required fields
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Invalid OTP or expired OTP
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "429":
+          description: Too many verification attempts
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error during token generation
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Verify OTP
+      tags:
+      - Authentication
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get the profile information of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "401":
+          description: Unauthorized - invalid or missing JWT token
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get User Profile
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information of the currently authenticated user
+      parameters:
+      - description: Profile update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized - invalid or missing JWT token
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update User Profile
+      tags:
+      - Users
+  /api/v1/users/search:
+    get:
+      consumes:
+      - application/json
+      description: Get users with optional search and pagination in a single endpoint
+      parameters:
+      - description: Search query (optional)
+        in: query
+        name: query
+        type: string
+      - description: 'Pagination offset (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      - description: 'Pagination limit (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            $ref: '#/definitions/dto.UnifiedUsersResponse'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized - invalid or missing JWT token
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Users Unified
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
