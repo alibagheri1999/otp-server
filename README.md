@@ -100,7 +100,7 @@ The system follows a clean, layered architecture:
    ```bash
    make docker-run   # Start all services with Docker
 
-   Or
+   # Or
 
    docker compose up
    ```
